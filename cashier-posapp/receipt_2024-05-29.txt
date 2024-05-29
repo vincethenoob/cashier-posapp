@@ -1,0 +1,8 @@
+Receipt for Purchase
+====================
+
+Date and Time: Wed May 29 21:16:15 CST 2024
+
+Items Purchased:
+Product ID: 2, Quantity: 2, Quantity Left: 6
+Total Purchase: ₱50.0

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.shape.*?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+
+<VBox alignment="CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
+      prefHeight="595.0" prefWidth="930.0" style="-fx-background-color: #f0f0f0;"
+      xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="guis.cashierposapp.PosAppController">
+    <Pane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
+          prefHeight="568.0" prefWidth="842.0" style="-fx-background-color: #ffffff;" VBox.vgrow="NEVER">
+        <Label fx:id="welcomeText" layoutX="44.0" layoutY="14.0" prefHeight="30.0" prefWidth="100.0" text="Welcome!" />
+        <ComboBox fx:id="productComboBox" layoutX="19.0" layoutY="50.0" prefWidth="200.0" />
+        <TextField fx:id="quantityTextField" layoutX="17.0" layoutY="100.0" prefWidth="150.0" promptText="Quantity" />
+        <ListView fx:id="cartListView" layoutX="300.0" layoutY="50.0" prefHeight="372.0" prefWidth="178.0" />
+        <Button fx:id="addButton" layoutX="30.0" layoutY="250.0" text="Add" onAction="#addToCart" />
+        <Button fx:id="editButton" layoutX="30.0" layoutY="290.0" text="Edit" onAction="#editQuantity" />
+        <Button fx:id="deleteButton" layoutX="30.0" layoutY="330.0" text="Delete" onAction="#deleteFromCart" />
+        <Button fx:id="checkoutButton" layoutX="30.0" layoutY="370.0" text="Checkout" onAction="#checkOut" />
+    </Pane>
+</VBox>
