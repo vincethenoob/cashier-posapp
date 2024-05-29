@@ -32,7 +32,7 @@ public class PosAppController {
     private DecimalFormat decimalFormat;
 
     public void initialize() {
-        // Initialize products with placeholder data
+    
         products = new ArrayList<>();
         products.add(new Product("1", "T-Shirt", 10, 15.0));
         products.add(new Product("2", "Pants", 8, 25.0));
