@@ -14,7 +14,6 @@ public class MainApp extends Application {
         Parent root = loader.load();
 
         PosAppController controller = loader.getController();
-        // You can do any additional initialization of the controller here if needed
 
         Scene scene = new Scene(root);
         primaryStage.setScene(scene);
