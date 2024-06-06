@@ -2,239 +2,307 @@ package app.cashierposapp;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.Scene;
 import javafx.scene.chart.PieChart;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.layout.VBox;
-import javafx.stage.Modality;
-import javafx.stage.Stage;
 
-import java.io.BufferedWriter;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.io.*;
 import java.time.LocalDate;
-import java.util.List;
-import java.util.stream.Collectors;
+import java.util.HashMap;
+import java.util.Map;
 
 public class HelloController {
 
-    @FXML
-    private ComboBox<String> ClothingComboBox, outdoorComboBox, FoodComboBox, indoorComboBox;
     @FXML
     private DatePicker SalesHistoryDate, SetCartpurchaseDate, fromDate, toDate;
     @FXML
     private ListView<String> cartListView, SaleHistoryList;
     @FXML
-    private TextField temporarytotal, Taxtotal, overalltotal, Indooritemsquantity, outsideitemsquantity, Fooditemsquantity, Clothingitemsquantity;
+    private ComboBox<String> ItemsComboBox;
     @FXML
-    private TableView<Product> productTableView;
+    private TextField temporarytotal, Taxtotal, overalltotal, Indooritemsquantity;
     @FXML
-    private TableColumn<Product, String> itemNameColumn;
+    private TableView<Map<String, String>> productTableView;
     @FXML
-    private TableColumn<Product, Integer> quantityColumn;
-    @FXML
-    private TableColumn<Product, Double> retailPriceColumn;
+    private TableColumn<Map<String, String>, String> retailPriceColumn1, itemNameColumn, quantityColumn, retailPriceColumn;
     @FXML
     private PieChart productPieChart;
     @FXML
-    private Button addButton, editButton, deleteButton, checkoutButton, Showsalehistory, showButton, resetCart;
+    private Button addButton, editButton, deleteButton, checkoutButton, resetCart, Showsalehistory, showButton;
 
-    private final ObservableList<String> cartItems = FXCollections.observableArrayList();
-    private final ObservableList<Product> products = FXCollections.observableArrayList(
-            new Product("Indoor Item 1", 10.0, 100),
-            new Product("Indoor Item 2", 15.0, 80),
-            new Product("Outdoor Item 1", 20.0, 50),
-            new Product("Outdoor Item 2", 25.0, 60),
-            new Product("Food Item 1", 5.0, 200),
-            new Product("Food Item 2", 8.0, 150),
-            new Product("Clothing Item 1", 30.0, 70),
-            new Product("Clothing Item 2", 35.0, 40)
-    );
+    private ObservableList<String> cartItems = FXCollections.observableArrayList();
+    private ObservableList<String> salesHistory = FXCollections.observableArrayList();
+    private ObservableList<String> availableItems = FXCollections.observableArrayList("Item1", "Item2", "Item3");
+    private Map<String, Integer> itemPrices = new HashMap<>();
+    private double taxRate = 0.10;
 
-    @FXML
     public void initialize() {
-        // Initialize ComboBoxes
-        indoorComboBox.setItems(FXCollections.observableArrayList("Indoor Item 1", "Indoor Item 2"));
-        outdoorComboBox.setItems(FXCollections.observableArrayList("Outdoor Item 1", "Outdoor Item 2"));
-        FoodComboBox.setItems(FXCollections.observableArrayList("Food Item 1", "Food Item 2"));
-        ClothingComboBox.setItems(FXCollections.observableArrayList("Clothing Item 1", "Clothing Item 2"));
-
-        // Initialize Cart ListView
+        ItemsComboBox.setItems(availableItems);
         cartListView.setItems(cartItems);
+        SaleHistoryList.setItems(salesHistory);
 
-        // Initialize Product Table
-        itemNameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
-        quantityColumn.setCellValueFactory(new PropertyValueFactory<>("quantity"));
-        retailPriceColumn.setCellValueFactory(new PropertyValueFactory<>("price"));
-        productTableView.setItems(products);
+        itemPrices.put("Item1", 10);
+        itemPrices.put("Item2", 20);
+        itemPrices.put("Item3", 30);
+
+        // Make ItemsComboBox searchable
+        makeComboBoxSearchable(ItemsComboBox);
+
+        // Initialize table columns
+        initializeTableColumns();
     }
 
-    @FXML
-    private void addToCart(ActionEvent event) {
-        String item = getSelectedItem();
-        if (item != null) {
-            int quantity = getQuantity();
-            if (quantity > 0) {
-                cartItems.add(item + " x" + quantity);
-                updateTotals();
+    private void makeComboBoxSearchable(ComboBox<String> comboBox) {
+        comboBox.setEditable(true);
+        comboBox.getEditor().textProperty().addListener((observable, oldValue, newValue) -> {
+            ObservableList<String> filteredItems = FXCollections.observableArrayList();
+            for (String item : availableItems) {
+                if (item.toLowerCase().contains(newValue.toLowerCase())) {
+                    filteredItems.add(item);
+                }
             }
-        }
-    }
-
-    @FXML
-    private void editQuantity(ActionEvent event) {
-        String selectedItem = cartListView.getSelectionModel().getSelectedItem();
-        if (selectedItem != null) {
-            cartItems.remove(selectedItem);
-            addToCart(event);
-        }
-    }
-
-    @FXML
-    private void deleteFromCart(ActionEvent event) {
-        String selectedItem = cartListView.getSelectionModel().getSelectedItem();
-        if (selectedItem != null) {
-            cartItems.remove(selectedItem);
-            updateTotals();
-        }
-    }
-
-    @FXML
-    private void checkOut(ActionEvent event) {
-        double total = calculateTotal();
-        double tax = total * 0.1; // 10% tax
-        double overallTotal = total + tax;
-
-        temporarytotal.setText(String.valueOf(total));
-        Taxtotal.setText(String.valueOf(tax));
-        overalltotal.setText(String.valueOf(overallTotal));
-
-        Stage checkoutStage = new Stage();
-        checkoutStage.initModality(Modality.APPLICATION_MODAL);
-        checkoutStage.setTitle("Checkout");
-
-        Label totalLabel = new Label("Total: " + overallTotal);
-        TextField moneyField = new TextField();
-        moneyField.setPromptText("Enter your money amount");
-        Button generateReceiptButton = new Button("Generate Receipt");
-        Label changeLabel = new Label();
-
-        generateReceiptButton.setOnAction(e -> {
-            double moneyAmount = Double.parseDouble(moneyField.getText());
-            double change = moneyAmount - overallTotal;
-            changeLabel.setText("Change: " + change);
-
-            recordPurchase(overallTotal);
-            generateReceipt(overallTotal, moneyAmount, change);
-            cartItems.clear();
-            updateTotals();
+            comboBox.setItems(filteredItems);
+            comboBox.show();
         });
+        comboBox.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
+            comboBox.getEditor().setText(newValue);
+        });
+    }
 
-        VBox layout = new VBox(10, totalLabel, moneyField, generateReceiptButton, changeLabel);
-        Scene scene = new Scene(layout, 300, 200);
-        checkoutStage.setScene(scene);
-        checkoutStage.showAndWait();
+    private void initializeTableColumns() {
+        itemNameColumn.setCellValueFactory(new PropertyValueFactory<>("itemName"));
+        quantityColumn.setCellValueFactory(new PropertyValueFactory<>("quantity"));
+        retailPriceColumn.setCellValueFactory(new PropertyValueFactory<>("retailPrice"));
+        retailPriceColumn1.setCellValueFactory(new PropertyValueFactory<>("date"));
     }
 
     @FXML
-    private void showStatistics(ActionEvent event) {
+    private void addToCart() {
+        if (SetCartpurchaseDate.getValue() == null) {
+            showAlert("Set purchase date before adding items.");
+            return;
+        }
+
+        String item = ItemsComboBox.getValue();
+        String quantityStr = Indooritemsquantity.getText();
+        if (item != null && !quantityStr.isEmpty()) {
+            try {
+                int quantity = Integer.parseInt(quantityStr);
+                cartItems.add(item + " x " + quantity);
+                updateTotals();
+                // Reset the search function of the ComboBox
+                ItemsComboBox.getEditor().clear();
+                ItemsComboBox.setItems(availableItems);
+            } catch (NumberFormatException e) {
+                showAlert("Invalid quantity. Please enter a number.");
+            }
+        } else {
+            showAlert("Select an item and enter quantity.");
+        }
+    }
+
+    @FXML
+    private void editQuantity() {
+        if (SetCartpurchaseDate.getValue() == null) {
+            showAlert("Set purchase date before editing items.");
+            return;
+        }
+
+        String selectedItem = cartListView.getSelectionModel().getSelectedItem();
+        if (selectedItem != null) {
+            String newQuantityStr = Indooritemsquantity.getText();
+            try {
+                int newQuantity = Integer.parseInt(newQuantityStr);
+                cartItems.set(cartListView.getSelectionModel().getSelectedIndex(), selectedItem.split(" x ")[0] + " x " + newQuantity);
+                updateTotals();
+            } catch (NumberFormatException e) {
+                showAlert("Invalid quantity. Please enter a number.");
+            }
+        } else {
+            showAlert("Select an item to edit.");
+        }
+    }
+
+    @FXML
+    private void deleteFromCart() {
+        if (SetCartpurchaseDate.getValue() == null) {
+            showAlert("Set purchase date before deleting items.");
+            return;
+        }
+
+        String selectedItem = cartListView.getSelectionModel().getSelectedItem();
+        if (selectedItem != null) {
+            cartItems.remove(selectedItem);
+            updateTotals();
+        } else {
+            showAlert("Select an item to delete.");
+        }
+    }
+
+    @FXML
+    private void resetCart() {
+        cartItems.clear();
+        temporarytotal.clear();
+        Taxtotal.clear();
+        overalltotal.clear();
+    }
+
+    @FXML
+    private void checkOut() {
+        if (cartItems.isEmpty()) {
+            showAlert("Cart is empty.");
+            return;
+        }
+
+        double total = Double.parseDouble(overalltotal.getText());
+        TextInputDialog dialog = new TextInputDialog();
+        dialog.setTitle("Checkout");
+        dialog.setHeaderText("Total: $" + total);
+        dialog.setContentText("Enter amount received:");
+
+        dialog.showAndWait().ifPresent(amountStr -> {
+            try {
+                double amount = Double.parseDouble(amountStr);
+                if (amount >= total) {
+                    double change = amount - total;
+                    showAlert("Change: $" + change);
+                    generateReceipt();
+                    saveSalesToCSV();
+                    resetCart();
+                } else {
+                    showAlert("Insufficient amount. Please enter a valid amount.");
+                }
+            } catch (NumberFormatException e) {
+                showAlert("Invalid amount. Please enter a number.");
+            }
+        });
+    }
+
+    @FXML
+    private void showSaleHistory() {
+        salesHistory.clear();
+        LocalDate date = SalesHistoryDate.getValue();
+        if (date != null) {
+            File file = new File("sales_history.csv");
+            if (file.exists()) {
+                try (BufferedReader br = new BufferedReader(new FileReader(file))) {
+                    String line;
+                    while ((line = br.readLine()) != null) {
+                        String[] parts = line.split(",");
+                        if (LocalDate.parse(parts[0]).isEqual(date)) {
+                            salesHistory.add(parts[1] + " x " + parts[2] + " - $" + parts[3]);
+                        }
+                    }
+                } catch (IOException e) {
+                    showAlert("Error reading sales history.");
+                }
+            } else {
+                showAlert("No sales history found.");
+            }
+        } else {
+            showAlert("Select a date to view sales history.");
+        }
+    }
+
+    @FXML
+    private void showStatistics() {
+        productTableView.getItems().clear();
+        productPieChart.getData().clear();
+
         LocalDate from = fromDate.getValue();
         LocalDate to = toDate.getValue();
-        if (from != null && to != null && !from.isAfter(to)) {
-            List<Product> filteredProducts = products.stream()
-                    .filter(product -> product.getDate().isAfter(from.minusDays(1)) && product.getDate().isBefore(to.plusDays(1)))
-                    .collect(Collectors.toList());
 
-            productTableView.setItems(FXCollections.observableArrayList(filteredProducts));
-            productPieChart.setData(filteredProducts.stream()
-                    .map(product -> new PieChart.Data(product.getName(), product.getQuantity()))
-                    .collect(Collectors.toCollection(FXCollections::observableArrayList)));
-        }
-    }
+        if (from != null && to != null) {
+            Map<String, Integer> productSales = new HashMap<>();
+            File file = new File("sales_history.csv");
 
-    private String getSelectedItem() {
-        if (indoorComboBox.getSelectionModel().getSelectedItem() != null) {
-            return indoorComboBox.getSelectionModel().getSelectedItem();
-        } else if (outdoorComboBox.getSelectionModel().getSelectedItem() != null) {
-            return outdoorComboBox.getSelectionModel().getSelectedItem();
-        } else if (FoodComboBox.getSelectionModel().getSelectedItem() != null) {
-            return FoodComboBox.getSelectionModel().getSelectedItem();
-        } else if (ClothingComboBox.getSelectionModel().getSelectedItem() != null) {
-            return ClothingComboBox.getSelectionModel().getSelectedItem();
-        }
-        return null;
-    }
+            if (file.exists()) {
+                try (BufferedReader br = new BufferedReader(new FileReader(file))) {
+                    String line;
+                    while ((line = br.readLine()) != null) {
+                        String[] parts = line.split(",");
+                        LocalDate date = LocalDate.parse(parts[0]);
+                        if (!date.isBefore(from) && !date.isAfter(to)) {
+                            String item = parts[1];
+                            int quantity = Integer.parseInt(parts[2]);
+                            int price = Integer.parseInt(parts[3]);
+                            productSales.put(item, productSales.getOrDefault(item, 0) + quantity);
 
-    private int getQuantity() {
-        try {
-            if (Indooritemsquantity.getText() != null && !Indooritemsquantity.getText().isEmpty()) {
-                return Integer.parseInt(Indooritemsquantity.getText());
-            } else if (outsideitemsquantity.getText() != null && !outsideitemsquantity.getText().isEmpty()) {
-                return Integer.parseInt(outsideitemsquantity.getText());
-            } else if (Fooditemsquantity.getText() != null && !Fooditemsquantity.getText().isEmpty()) {
-                return Integer.parseInt(Fooditemsquantity.getText());
-            } else if (Clothingitemsquantity.getText() != null && !Clothingitemsquantity.getText().isEmpty()) {
-                return Integer.parseInt(Clothingitemsquantity.getText());
+                            Map<String, String> row = new HashMap<>();
+                            row.put("date", parts[0]);
+                            row.put("itemName", item);
+                            row.put("quantity", String.valueOf(quantity));
+                            row.put("retailPrice", String.valueOf(price));
+                            productTableView.getItems().add(row);
+                        }
+                    }
+                } catch (IOException e) {
+                    showAlert("Error reading sales history.");
+                }
+
+                for (Map.Entry<String, Integer> entry : productSales.entrySet()) {
+                    productPieChart.getData().add(new PieChart.Data(entry.getKey(), entry.getValue()));
+                }
+            } else {
+                showAlert("No sales history found.");
             }
-        } catch (NumberFormatException e) {
-            // Handle invalid number format
+        } else {
+            showAlert("Select a valid date range.");
         }
-        return 0;
     }
 
     private void updateTotals() {
-        double total = calculateTotal();
-        double tax = total * 0.1; // 10% tax
-        double overallTotal = total + tax;
-
-        temporarytotal.setText(String.valueOf(total));
-        Taxtotal.setText(String.valueOf(tax));
-        overalltotal.setText(String.valueOf(overallTotal));
-    }
-
-    private double calculateTotal() {
-        double total = 0.0;
+        double subtotal = 0;
         for (String item : cartItems) {
-            String[] parts = item.split(" x");
+            String[] parts = item.split(" x ");
             String itemName = parts[0];
             int quantity = Integer.parseInt(parts[1]);
-            total += products.stream()
-                    .filter(product -> product.getName().equals(itemName))
-                    .mapToDouble(product -> product.getPrice() * quantity)
-                    .sum();
+            subtotal += itemPrices.get(itemName) * quantity;
         }
-        return total;
+
+        double tax = subtotal * taxRate;
+        double total = subtotal + tax;
+
+        temporarytotal.setText(String.valueOf(subtotal));
+        Taxtotal.setText(String.valueOf(tax));
+        overalltotal.setText(String.valueOf(total));
     }
 
-    private void recordPurchase(double total) {
-        LocalDate purchaseDate = SetCartpurchaseDate.getValue();
-        if (purchaseDate != null) {
-            try (BufferedWriter writer = new BufferedWriter(new FileWriter("purchase_history.csv", true))) {
-                writer.write(purchaseDate + "," + total + "\n");
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
-    private void generateReceipt(double total, double moneyAmount, double change) {
+    private void generateReceipt() {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter("receipt.txt"))) {
             writer.write("Receipt\n");
-            writer.write("--------------\n");
+            writer.write("Date: " + SetCartpurchaseDate.getValue() + "\n");
             for (String item : cartItems) {
                 writer.write(item + "\n");
             }
-            writer.write("--------------\n");
-            writer.write("Total: " + total + "\n");
-            writer.write("Paid: " + moneyAmount + "\n");
-            writer.write("Change: " + change + "\n");
+            writer.write("Subtotal: $" + temporarytotal.getText() + "\n");
+            writer.write("Tax: $" + Taxtotal.getText() + "\n");
+            writer.write("Total: $" + overalltotal.getText() + "\n");
         } catch (IOException e) {
-            e.printStackTrace();
+            showAlert("Error generating receipt.");
         }
+    }
+
+    private void saveSalesToCSV() {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter("sales_history.csv", true))) {
+            for (String item : cartItems) {
+                String[] parts = item.split(" x ");
+                String itemName = parts[0];
+                String quantity = parts[1];
+                String price = String.valueOf(itemPrices.get(itemName));
+                writer.write(SetCartpurchaseDate.getValue() + "," + itemName + "," + quantity + "," + price + "\n");
+            }
+        } catch (IOException e) {
+            showAlert("Error saving sales history.");
+        }
+    }
+
+    private void showAlert(String message) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Information");
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
     }
 }
