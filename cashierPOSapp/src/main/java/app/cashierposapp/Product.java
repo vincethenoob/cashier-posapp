@@ -4,31 +4,47 @@ import java.time.LocalDate;
 
 public class Product {
 
-    private final String name;
-    private final double price;
-    private final int quantity;
-    private final LocalDate date;
+    private LocalDate date;
+    private String itemName;
+    private int quantity;
+    private double retailPrice;
 
-    public Product(String name, double price, int quantity) {
-        this.name = name;
-        this.price = price;
+    public Product(LocalDate date, String itemName, int quantity, double retailPrice) {
+        this.date = date;
+        this.itemName = itemName;
         this.quantity = quantity;
-        this.date = LocalDate.now();
+        this.retailPrice = retailPrice;
     }
 
-    public String getName() {
-        return name;
+    public LocalDate getDate() {
+        return date;
     }
 
-    public double getPrice() {
-        return price;
+    public void setDate(LocalDate date) {
+        this.date = date;
+    }
+
+    public String getItemName() {
+        return itemName;
+    }
+
+    public void setItemName(String itemName) {
+        this.itemName = itemName;
     }
 
     public int getQuantity() {
         return quantity;
     }
 
-    public LocalDate getDate() {
-        return date;
+    public void setQuantity(int quantity) {
+        this.quantity = quantity;
+    }
+
+    public double getRetailPrice() {
+        return retailPrice;
+    }
+
+    public void setRetailPrice(double retailPrice) {
+        this.retailPrice = retailPrice;
     }
 }
