@@ -21,17 +21,14 @@
             <content>
                 <Pane prefHeight="510.0" prefWidth="1142.0">
                     <children>
-                        <ComboBox fx:id="ClothingComboBox" layoutX="161.0" layoutY="196.0" prefWidth="200.0" promptText="Clothing Items" />
                         <DatePicker fx:id="SalesHistoryDate" layoutX="634.0" layoutY="30.0" prefHeight="25.0" prefWidth="159.0" />
                         <ListView fx:id="cartListView" layoutX="373.0" layoutY="62.0" prefHeight="372.0" prefWidth="257.0" />
-                        <Button fx:id="addButton" layoutX="161.0" layoutY="236.0" onAction="#addToCart" text="Add" />
-                        <Button fx:id="editButton" layoutX="269.0" layoutY="236.0" onAction="#editQuantity" prefHeight="25.0" prefWidth="92.0" text="Edit Quantity" />
-                        <Button fx:id="deleteButton" layoutX="210.0" layoutY="236.0" onAction="#deleteFromCart" text="Delete" />
+                        <Button fx:id="addButton" layoutX="64.0" layoutY="320.0" onAction="#addToCart" text="Add" />
+                        <Button fx:id="editButton" layoutX="67.0" layoutY="355.0" onAction="#editQuantity" prefHeight="25.0" prefWidth="92.0" text="Edit Quantity" />
+                        <Button fx:id="deleteButton" layoutX="64.0" layoutY="280.0" onAction="#deleteFromCart" text="Delete" />
                         <Button fx:id="checkoutButton" layoutX="698.0" layoutY="422.0" onAction="#checkOut" text="Checkout" />
                         <ListView fx:id="SaleHistoryList" layoutX="634.0" layoutY="62.0" prefHeight="230.0" prefWidth="301.0" />
-                        <ComboBox fx:id="outdoorComboBox" layoutX="161.0" layoutY="115.0" prefWidth="200.0" promptText="Outside Items" />
-                        <ComboBox fx:id="FoodComboBox" layoutX="161.0" layoutY="152.0" prefWidth="200.0" promptText="Food" />
-                        <ComboBox fx:id="indoorComboBox" layoutX="161.0" layoutY="73.0" prefWidth="200.0" promptText="Indoor Items" />
+                        <ComboBox fx:id="ItemsComboBox" layoutX="161.0" layoutY="73.0" prefWidth="200.0" promptText="Items" />
                         <TextField fx:id="temporarytotal" editable="false" layoutX="714.0" layoutY="307.0" prefHeight="25.0" prefWidth="117.0" />
                         <TextField fx:id="Taxtotal" editable="false" layoutX="714.0" layoutY="342.0" prefHeight="25.0" prefWidth="117.0" />
                         <TextField fx:id="overalltotal" editable="false" layoutX="714.0" layoutY="380.0" prefHeight="25.0" prefWidth="117.0" />
@@ -39,13 +36,10 @@
                         <Label layoutX="634.0" layoutY="311.0" text="Sub Total" />
                         <Label layoutX="634.0" layoutY="346.0" text="Tax Amount" />
                         <Label layoutX="634.0" layoutY="384.0" text="Total" />
-                        <Button fx:id="Showsalehistory" layoutX="805.0" layoutY="30.0" mnemonicParsing="false" text="show history" />
+                        <Button fx:id="Showsalehistory" layoutX="805.0" layoutY="30.0" mnemonicParsing="false" text="Show History" onAction="#showSaleHistory" />
                         <DatePicker fx:id="SetCartpurchaseDate" layoutX="420.0" layoutY="30.0" prefHeight="25.0" prefWidth="200.0" promptText="Purchase Date" />
-                  <TextField fx:id="Indooritemsquantity" layoutX="71.0" layoutY="73.0" prefHeight="25.0" prefWidth="83.0" promptText="Quantity" />
-                  <TextField fx:id="outsideitemsquantity" layoutX="71.0" layoutY="115.0" prefHeight="25.0" prefWidth="83.0" promptText="Quantity" />
-                  <TextField fx:id="Fooditemsquantity" layoutX="71.0" layoutY="152.0" prefHeight="25.0" prefWidth="83.0" promptText="Quantity" />
-                  <TextField fx:id="Clothingitemsquantity" layoutX="71.0" layoutY="196.0" prefHeight="25.0" prefWidth="83.0" promptText="Quantity" />
-                  <Button fx:id="resetCart" layoutX="636.0" layoutY="422.0" mnemonicParsing="false" text="Reset" />
+                        <TextField fx:id="Indooritemsquantity" layoutX="71.0" layoutY="73.0" prefHeight="25.0" prefWidth="83.0" promptText="Quantity" />
+                        <Button fx:id="resetCart" layoutX="636.0" layoutY="422.0" mnemonicParsing="false" text="Reset" onAction="#resetCart" />
                     </children>
                 </Pane>
             </content>
@@ -59,9 +53,14 @@
                         <DatePicker fx:id="fromDate" layoutX="80.0" layoutY="40.0" prefWidth="120.0" />
                         <DatePicker fx:id="toDate" layoutX="210.0" layoutY="40.0" prefWidth="120.0" />
                         <Button fx:id="showButton" layoutX="340.0" layoutY="40.0" onAction="#showStatistics" prefHeight="25.0" prefWidth="81.0" text="Show data" />
-                        <TableView fx:id="productTableView" layoutX="14.0" layoutY="80.0" prefHeight="300.0" prefWidth="450.0">
+                        <TableView fx:id="productTableView" layoutX="50.0" layoutY="80.0" prefHeight="300.0" prefWidth="448.0">
                             <columns>
-                                <TableColumn fx:id="itemNameColumn" prefWidth="150.0" text="Item name">
+                                <TableColumn fx:id="retailPriceColumn1" prefWidth="100.0" text="Date">
+                                    <cellValueFactory>
+                                        <PropertyValueFactory property="date" />
+                                    </cellValueFactory>
+                                </TableColumn>
+                                <TableColumn fx:id="itemNameColumn" prefWidth="150.0" text="Item Name">
                                     <cellValueFactory>
                                         <PropertyValueFactory property="itemName" />
                                     </cellValueFactory>
@@ -71,14 +70,14 @@
                                         <PropertyValueFactory property="quantity" />
                                     </cellValueFactory>
                                 </TableColumn>
-                                <TableColumn fx:id="retailPriceColumn" prefWidth="100.0" text="Retail price">
+                                <TableColumn fx:id="retailPriceColumn" prefWidth="100.0" text="Retail Price">
                                     <cellValueFactory>
                                         <PropertyValueFactory property="retailPrice" />
                                     </cellValueFactory>
                                 </TableColumn>
                             </columns>
                         </TableView>
-                        <PieChart fx:id="productPieChart" layoutX="480.0" layoutY="80.0" prefHeight="300.0" prefWidth="450.0" />
+                        <PieChart fx:id="productPieChart" layoutX="531.0" layoutY="80.0" prefHeight="300.0" prefWidth="427.0" />
                     </children>
                 </AnchorPane>
             </content>
