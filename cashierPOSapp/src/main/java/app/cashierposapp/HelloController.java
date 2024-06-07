@@ -158,7 +158,7 @@ public class HelloController {
         double total = Double.parseDouble(overalltotal.getText());
         TextInputDialog dialog = new TextInputDialog();
         dialog.setTitle("Checkout");
-        dialog.setHeaderText("Total: $" + total);
+        dialog.setHeaderText("Total: ₱" + total);
         dialog.setContentText("Enter amount received:");
 
         dialog.showAndWait().ifPresent(amountStr -> {
@@ -166,7 +166,7 @@ public class HelloController {
                 double amount = Double.parseDouble(amountStr);
                 if (amount >= total) {
                     double change = amount - total;
-                    showAlert("Change: $" + change);
+                    showAlert("Change: ₱" + change);
                     generateReceipt();
                     saveSalesToCSV();
                     resetCart();
@@ -191,7 +191,7 @@ public class HelloController {
                     while ((line = br.readLine()) != null) {
                         String[] parts = line.split(",");
                         if (LocalDate.parse(parts[0]).isEqual(date)) {
-                            salesHistory.add(parts[1] + " x " + parts[2] + " - $" + parts[3]);
+                            salesHistory.add(parts[1] + " x " + parts[2] + " - ₱" + parts[3]);
                         }
                     }
                 } catch (IOException e) {
@@ -276,9 +276,9 @@ public class HelloController {
             for (String item : cartItems) {
                 writer.write(item + "\n");
             }
-            writer.write("Subtotal: $" + temporarytotal.getText() + "\n");
-            writer.write("Tax: $" + Taxtotal.getText() + "\n");
-            writer.write("Total: $" + overalltotal.getText() + "\n");
+            writer.write("Subtotal: ₱" + temporarytotal.getText() + "\n");
+            writer.write("Tax: ₱" + Taxtotal.getText() + "\n");
+            writer.write("Total: ₱" + overalltotal.getText() + "\n");
         } catch (IOException e) {
             showAlert("Error generating receipt.");
         }
