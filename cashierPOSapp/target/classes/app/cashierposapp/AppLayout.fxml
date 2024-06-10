@@ -8,18 +8,15 @@
 <?import javafx.scene.control.ListView?>
 <?import javafx.scene.control.Tab?>
 <?import javafx.scene.control.TabPane?>
-<?import javafx.scene.control.TableColumn?>
-<?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.TextField?>
-<?import javafx.scene.control.cell.PropertyValueFactory?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.Pane?>
 
-<TabPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="539.0" prefWidth="964.0" tabClosingPolicy="UNAVAILABLE" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="app.cashierposapp.HelloController">
+<TabPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="539.0" prefWidth="964.0" tabClosingPolicy="UNAVAILABLE" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="app.cashierposapp.AppController">
     <tabs>
         <Tab text="Cashier App">
             <content>
-                <Pane prefHeight="510.0" prefWidth="1142.0">
+                <Pane prefHeight="510.0" prefWidth="964.0">
                     <children>
                         <DatePicker fx:id="SalesHistoryDate" layoutX="634.0" layoutY="30.0" prefHeight="25.0" prefWidth="159.0" />
                         <ListView fx:id="cartListView" layoutX="373.0" layoutY="62.0" prefHeight="372.0" prefWidth="257.0" />
@@ -46,38 +43,15 @@
         </Tab>
         <Tab text="Statistics">
             <content>
-                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="510.0" prefWidth="1049.0">
+                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="510.0" prefWidth="964.0">
                     <children>
                         <Label layoutX="14.0" layoutY="14.0" text="Top products" />
                         <Label layoutX="14.0" layoutY="40.0" text="Date Range" />
                         <DatePicker fx:id="fromDate" layoutX="80.0" layoutY="40.0" prefWidth="120.0" />
                         <DatePicker fx:id="toDate" layoutX="210.0" layoutY="40.0" prefWidth="120.0" />
                         <Button fx:id="showButton" layoutX="340.0" layoutY="40.0" onAction="#showStatistics" prefHeight="25.0" prefWidth="81.0" text="Show data" />
-                        <TableView fx:id="productTableView" layoutX="50.0" layoutY="80.0" prefHeight="300.0" prefWidth="448.0">
-                            <columns>
-                                <TableColumn fx:id="retailPriceColumn1" prefWidth="100.0" text="Date">
-                                    <cellValueFactory>
-                                        <PropertyValueFactory property="date" />
-                                    </cellValueFactory>
-                                </TableColumn>
-                                <TableColumn fx:id="itemNameColumn" prefWidth="150.0" text="Item Name">
-                                    <cellValueFactory>
-                                        <PropertyValueFactory property="itemName" />
-                                    </cellValueFactory>
-                                </TableColumn>
-                                <TableColumn fx:id="quantityColumn" prefWidth="100.0" text="Quantity">
-                                    <cellValueFactory>
-                                        <PropertyValueFactory property="quantity" />
-                                    </cellValueFactory>
-                                </TableColumn>
-                                <TableColumn fx:id="retailPriceColumn" prefWidth="100.0" text="Retail Price">
-                                    <cellValueFactory>
-                                        <PropertyValueFactory property="retailPrice" />
-                                    </cellValueFactory>
-                                </TableColumn>
-                            </columns>
-                        </TableView>
-                        <PieChart fx:id="productPieChart" layoutX="531.0" layoutY="80.0" prefHeight="300.0" prefWidth="427.0" />
+                        <ListView fx:id="productListView" layoutX="50.0" layoutY="80.0" prefHeight="300.0" prefWidth="448.0" />
+                        <PieChart fx:id="productPieChart" layoutX="531.0" layoutY="80.0" prefHeight="300.0" prefWidth="400.0" />
                     </children>
                 </AnchorPane>
             </content>

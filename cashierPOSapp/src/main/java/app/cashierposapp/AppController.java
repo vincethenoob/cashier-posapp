@@ -5,42 +5,38 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.chart.PieChart;
 import javafx.scene.control.*;
-import javafx.scene.control.cell.PropertyValueFactory;
 
 import java.io.*;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
 
-public class HelloController {
+public class AppController {
 
     @FXML
     private DatePicker SalesHistoryDate, SetCartpurchaseDate, fromDate, toDate;
     @FXML
-    private ListView<String> cartListView, SaleHistoryList;
+    private ListView<String> cartListView, SaleHistoryList, productListView;
     @FXML
     private ComboBox<String> ItemsComboBox;
     @FXML
     private TextField temporarytotal, Taxtotal, overalltotal, Indooritemsquantity;
     @FXML
-    private TableView<Map<String, String>> productTableView;
-    @FXML
-    private TableColumn<Map<String, String>, String> retailPriceColumn1, itemNameColumn, quantityColumn, retailPriceColumn;
-    @FXML
     private PieChart productPieChart;
     @FXML
     private Button addButton, editButton, deleteButton, checkoutButton, resetCart, Showsalehistory, showButton;
 
-    private ObservableList<String> cartItems = FXCollections.observableArrayList();
-    private ObservableList<String> salesHistory = FXCollections.observableArrayList();
-    private ObservableList<String> availableItems = FXCollections.observableArrayList("Item1", "Item2", "Item3");
-    private Map<String, Integer> itemPrices = new HashMap<>();
-    private double taxRate = 0.10;
+    private final ObservableList<String> cartItems = FXCollections.observableArrayList();
+    private final ObservableList<String> salesHistory = FXCollections.observableArrayList();
+    private final ObservableList<String> availableItems = FXCollections.observableArrayList("Item1", "Item2", "Item3");
+    private final Map<String, Integer> itemPrices = new HashMap<>();
+    private final double taxRate = 0.10;
 
     public void initialize() {
         ItemsComboBox.setItems(availableItems);
         cartListView.setItems(cartItems);
         SaleHistoryList.setItems(salesHistory);
+        productListView.setItems(FXCollections.observableArrayList());
 
         itemPrices.put("Item1", 10);
         itemPrices.put("Item2", 20);
@@ -49,8 +45,18 @@ public class HelloController {
         // Make ItemsComboBox searchable
         makeComboBoxSearchable(ItemsComboBox);
 
-        // Initialize table columns
-        initializeTableColumns();
+        // Custom cell factory for productListView
+        productListView.setCellFactory(lv -> new ListCell<String>() {
+            @Override
+            protected void updateItem(String item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) {
+                    setText(null);
+                } else {
+                    setText(item);
+                }
+            }
+        });
     }
 
     private void makeComboBoxSearchable(ComboBox<String> comboBox) {
@@ -68,13 +74,6 @@ public class HelloController {
         comboBox.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
             comboBox.getEditor().setText(newValue);
         });
-    }
-
-    private void initializeTableColumns() {
-        itemNameColumn.setCellValueFactory(new PropertyValueFactory<>("itemName"));
-        quantityColumn.setCellValueFactory(new PropertyValueFactory<>("quantity"));
-        retailPriceColumn.setCellValueFactory(new PropertyValueFactory<>("retailPrice"));
-        retailPriceColumn1.setCellValueFactory(new PropertyValueFactory<>("date"));
     }
 
     @FXML
@@ -158,7 +157,7 @@ public class HelloController {
         double total = Double.parseDouble(overalltotal.getText());
         TextInputDialog dialog = new TextInputDialog();
         dialog.setTitle("Checkout");
-        dialog.setHeaderText("Total: ₱" + total);
+        dialog.setHeaderText("Total: $" + total);
         dialog.setContentText("Enter amount received:");
 
         dialog.showAndWait().ifPresent(amountStr -> {
@@ -166,7 +165,7 @@ public class HelloController {
                 double amount = Double.parseDouble(amountStr);
                 if (amount >= total) {
                     double change = amount - total;
-                    showAlert("Change: ₱" + change);
+                    showAlert("Change: $" + change);
                     generateReceipt();
                     saveSalesToCSV();
                     resetCart();
@@ -191,7 +190,7 @@ public class HelloController {
                     while ((line = br.readLine()) != null) {
                         String[] parts = line.split(",");
                         if (LocalDate.parse(parts[0]).isEqual(date)) {
-                            salesHistory.add(parts[1] + " x " + parts[2] + " - ₱" + parts[3]);
+                            salesHistory.add(parts[1] + " x " + parts[2] + " - $" + parts[3]);
                         }
                     }
                 } catch (IOException e) {
@@ -207,7 +206,7 @@ public class HelloController {
 
     @FXML
     private void showStatistics() {
-        productTableView.getItems().clear();
+        productListView.getItems().clear();
         productPieChart.getData().clear();
 
         LocalDate from = fromDate.getValue();
@@ -227,14 +226,12 @@ public class HelloController {
                             String item = parts[1];
                             int quantity = Integer.parseInt(parts[2]);
                             int price = Integer.parseInt(parts[3]);
+                            int totalPrice = Integer.parseInt(parts[4]); // Parse total price
                             productSales.put(item, productSales.getOrDefault(item, 0) + quantity);
 
-                            Map<String, String> row = new HashMap<>();
-                            row.put("date", parts[0]);
-                            row.put("itemName", item);
-                            row.put("quantity", String.valueOf(quantity));
-                            row.put("retailPrice", String.valueOf(price));
-                            productTableView.getItems().add(row);
+                            String row = String.format("Date: %s | Item: %s | Quantity: %d | Retail Price: %d | Total: %d",
+                                    parts[0], item, quantity, price, totalPrice);
+                            productListView.getItems().add(row);
                         }
                     }
                 } catch (IOException e) {
@@ -271,14 +268,13 @@ public class HelloController {
 
     private void generateReceipt() {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter("receipt.txt"))) {
-            writer.write("Receipt\n");
-            writer.write("Date: " + SetCartpurchaseDate.getValue() + "\n");
+            writer.write("Receipt:\n");
             for (String item : cartItems) {
                 writer.write(item + "\n");
             }
-            writer.write("Subtotal: ₱" + temporarytotal.getText() + "\n");
-            writer.write("Tax: ₱" + Taxtotal.getText() + "\n");
-            writer.write("Total: ₱" + overalltotal.getText() + "\n");
+            writer.write("\nSubtotal: $" + temporarytotal.getText());
+            writer.write("\nTax: $" + Taxtotal.getText());
+            writer.write("\nTotal: $" + overalltotal.getText());
         } catch (IOException e) {
             showAlert("Error generating receipt.");
         }
@@ -289,14 +285,17 @@ public class HelloController {
             for (String item : cartItems) {
                 String[] parts = item.split(" x ");
                 String itemName = parts[0];
-                String quantity = parts[1];
-                String price = String.valueOf(itemPrices.get(itemName));
-                writer.write(SetCartpurchaseDate.getValue() + "," + itemName + "," + quantity + "," + price + "\n");
+                int quantity = Integer.parseInt(parts[1]);
+                int price = itemPrices.get(itemName);
+                int totalPrice = quantity * price;
+                writer.write(LocalDate.now() + "," + itemName + "," + quantity + "," + price + "," + totalPrice);
+                writer.newLine();
             }
         } catch (IOException e) {
             showAlert("Error saving sales history.");
         }
     }
+
 
     private void showAlert(String message) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
