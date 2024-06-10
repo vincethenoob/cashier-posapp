@@ -3,16 +3,20 @@ package app.cashierposapp;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.scene.chart.LineChart;
 import javafx.scene.chart.PieChart;
+import javafx.scene.chart.XYChart;
 import javafx.scene.control.*;
 
 import java.io.*;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
 
 public class AppController {
 
+    public Button showButton,checkoutButton,Showsalehistory,addButton,editButton,deleteButton;
     @FXML
     private DatePicker SalesHistoryDate, SetCartpurchaseDate, fromDate, toDate;
     @FXML
@@ -24,13 +28,12 @@ public class AppController {
     @FXML
     private PieChart productPieChart;
     @FXML
-    private Button addButton, editButton, deleteButton, checkoutButton, resetCart, Showsalehistory, showButton;
+    private LineChart<String, Number> Profitgraph;
 
     private final ObservableList<String> cartItems = FXCollections.observableArrayList();
     private final ObservableList<String> salesHistory = FXCollections.observableArrayList();
     private final ObservableList<String> availableItems = FXCollections.observableArrayList("Item1", "Item2", "Item3");
     private final Map<String, Integer> itemPrices = new HashMap<>();
-    private final double taxRate = 0.10;
 
     public void initialize() {
         ItemsComboBox.setItems(availableItems);
@@ -57,6 +60,9 @@ public class AppController {
                 }
             }
         });
+
+        // Do not set the initial value for SetCartpurchaseDate
+        SetCartpurchaseDate.setValue(null);
     }
 
     private void makeComboBoxSearchable(ComboBox<String> comboBox) {
@@ -157,7 +163,7 @@ public class AppController {
         double total = Double.parseDouble(overalltotal.getText());
         TextInputDialog dialog = new TextInputDialog();
         dialog.setTitle("Checkout");
-        dialog.setHeaderText("Total: $" + total);
+        dialog.setHeaderText("Total: ₱" + total);
         dialog.setContentText("Enter amount received:");
 
         dialog.showAndWait().ifPresent(amountStr -> {
@@ -165,7 +171,7 @@ public class AppController {
                 double amount = Double.parseDouble(amountStr);
                 if (amount >= total) {
                     double change = amount - total;
-                    showAlert("Change: $" + change);
+                    showAlert("Change: ₱" + change);
                     generateReceipt();
                     saveSalesToCSV();
                     resetCart();
@@ -190,7 +196,7 @@ public class AppController {
                     while ((line = br.readLine()) != null) {
                         String[] parts = line.split(",");
                         if (LocalDate.parse(parts[0]).isEqual(date)) {
-                            salesHistory.add(parts[1] + " x " + parts[2] + " - $" + parts[3]);
+                            salesHistory.add(parts[1] + " x " + parts[2] + " - ₱" + parts[3]);
                         }
                     }
                 } catch (IOException e) {
@@ -214,6 +220,7 @@ public class AppController {
 
         if (from != null && to != null) {
             Map<String, Integer> productSales = new HashMap<>();
+            Map<LocalDate, Integer> dailyProfit = new HashMap<>();
             File file = new File("sales_history.csv");
 
             if (file.exists()) {
@@ -229,6 +236,8 @@ public class AppController {
                             int totalPrice = Integer.parseInt(parts[4]); // Parse total price
                             productSales.put(item, productSales.getOrDefault(item, 0) + quantity);
 
+                            dailyProfit.put(date, dailyProfit.getOrDefault(date, 0) + totalPrice);
+
                             String row = String.format("Date: %s | Item: %s | Quantity: %d | Retail Price: %d | Total: %d",
                                     parts[0], item, quantity, price, totalPrice);
                             productListView.getItems().add(row);
@@ -241,12 +250,26 @@ public class AppController {
                 for (Map.Entry<String, Integer> entry : productSales.entrySet()) {
                     productPieChart.getData().add(new PieChart.Data(entry.getKey(), entry.getValue()));
                 }
+
+                updateProfitGraph(dailyProfit);
             } else {
                 showAlert("No sales history found.");
             }
         } else {
             showAlert("Select a valid date range.");
         }
+    }
+
+    private void updateProfitGraph(Map<LocalDate, Integer> dailyProfit) {
+        XYChart.Series<String, Number> series = new XYChart.Series<>();
+        series.setName("Daily Profit");
+
+        for (Map.Entry<LocalDate, Integer> entry : dailyProfit.entrySet()) {
+            series.getData().add(new XYChart.Data<>(entry.getKey().toString(), entry.getValue()));
+        }
+
+        Profitgraph.getData().clear();
+        Profitgraph.getData().add(series);
     }
 
     private void updateTotals() {
@@ -258,6 +281,7 @@ public class AppController {
             subtotal += itemPrices.get(itemName) * quantity;
         }
 
+        double taxRate = 0.10;
         double tax = subtotal * taxRate;
         double total = subtotal + tax;
 
@@ -267,14 +291,17 @@ public class AppController {
     }
 
     private void generateReceipt() {
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter("receipt.txt"))) {
+        String timestamp = DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss").format(java.time.LocalDateTime.now());
+        String receiptFileName = "receipt_" + timestamp + ".txt";
+
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(receiptFileName))) {
             writer.write("Receipt:\n");
             for (String item : cartItems) {
                 writer.write(item + "\n");
             }
-            writer.write("\nSubtotal: $" + temporarytotal.getText());
-            writer.write("\nTax: $" + Taxtotal.getText());
-            writer.write("\nTotal: $" + overalltotal.getText());
+            writer.write("\nSubtotal: ₱" + temporarytotal.getText());
+            writer.write("\nTax: ₱" + Taxtotal.getText());
+            writer.write("\nTotal: ₱" + overalltotal.getText());
         } catch (IOException e) {
             showAlert("Error generating receipt.");
         }
@@ -288,14 +315,13 @@ public class AppController {
                 int quantity = Integer.parseInt(parts[1]);
                 int price = itemPrices.get(itemName);
                 int totalPrice = quantity * price;
-                writer.write(LocalDate.now() + "," + itemName + "," + quantity + "," + price + "," + totalPrice);
+                writer.write(SetCartpurchaseDate.getValue() + "," + itemName + "," + quantity + "," + price + "," + totalPrice);
                 writer.newLine();
             }
         } catch (IOException e) {
             showAlert("Error saving sales history.");
         }
     }
-
 
     private void showAlert(String message) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);

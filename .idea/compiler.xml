@@ -7,8 +7,10 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <module name="cashierPOSapp" />
-        <module name="SeniedoTodoList" />
       </profile>
     </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="SeniedoTodoList" target="22" />
+    </bytecodeTargetLevel>
   </component>
 </project>
