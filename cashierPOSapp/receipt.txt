@@ -1,8 +1,0 @@
-Receipt
---------------
-Indoor Item 2 x1
-Indoor Item 2 x8
---------------
-Total: 148.5
-Paid: 500.0
-Change: 351.5
