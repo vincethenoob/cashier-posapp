@@ -32,7 +32,12 @@ public class AppController {
 
     private final ObservableList<String> cartItems = FXCollections.observableArrayList();
     private final ObservableList<String> salesHistory = FXCollections.observableArrayList();
-    private final ObservableList<String> availableItems = FXCollections.observableArrayList("Item1", "Item2", "Item3");
+    private final ObservableList<String> availableItems = FXCollections.observableArrayList(
+            "Apple", "Banana", "Orange", "Milk", "Eggs", "Bread", "Butter",
+            "Cheese", "Chicken Breast", "Ground Beef", "Rice", "Pasta",
+            "Tomato Sauce", "Potato Chips", "Cookies", "Ice Cream",
+            "Cereal", "Toilet Paper", "Shampoo", "Toothpaste"
+    );
     private final Map<String, Integer> itemPrices = new HashMap<>();
 
     public void initialize() {
@@ -41,9 +46,27 @@ public class AppController {
         SaleHistoryList.setItems(salesHistory);
         productListView.setItems(FXCollections.observableArrayList());
 
-        itemPrices.put("Item1", 10);
-        itemPrices.put("Item2", 20);
-        itemPrices.put("Item3", 30);
+        itemPrices.put("Apple", 5);
+        itemPrices.put("Banana", 3);
+        itemPrices.put("Orange", 4);
+        itemPrices.put("Milk", 20);
+        itemPrices.put("Eggs", 15);
+        itemPrices.put("Bread", 10);
+        itemPrices.put("Butter", 25);
+        itemPrices.put("Cheese", 30);
+        itemPrices.put("Chicken Breast", 50);
+        itemPrices.put("Ground Beef", 60);
+        itemPrices.put("Rice", 40);
+        itemPrices.put("Pasta", 25);
+        itemPrices.put("Tomato Sauce", 15);
+        itemPrices.put("Potato Chips", 10);
+        itemPrices.put("Cookies", 12);
+        itemPrices.put("Ice Cream", 35);
+        itemPrices.put("Cereal", 28);
+        itemPrices.put("Toilet Paper", 18);
+        itemPrices.put("Shampoo", 45);
+        itemPrices.put("Toothpaste", 22);
+
 
         // Make ItemsComboBox searchable
         makeComboBoxSearchable(ItemsComboBox);
@@ -96,9 +119,9 @@ public class AppController {
                 int quantity = Integer.parseInt(quantityStr);
                 cartItems.add(item + " x " + quantity);
                 updateTotals();
-                // Reset the search function of the ComboBox
                 ItemsComboBox.getEditor().clear();
                 ItemsComboBox.setItems(availableItems);
+                ItemsComboBox.getSelectionModel().clearSelection(); // Clear the selection in the ComboBox
             } catch (NumberFormatException e) {
                 showAlert("Invalid quantity. Please enter a number.");
             }
@@ -295,16 +318,42 @@ public class AppController {
         String receiptFileName = "receipt_" + timestamp + ".txt";
 
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(receiptFileName))) {
+            // Header
+            writer.write("**************************\n");
+            writer.write("       STORE NAME        \n");
+            writer.write("    ADDRESS LINE 1       \n");
+            writer.write("    ADDRESS LINE 2       \n");
+            writer.write("    PHONE NUMBER         \n");
+            writer.write("**************************\n\n");
+
             writer.write("Receipt:\n");
+            writer.write("Date: " + DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").format(java.time.LocalDateTime.now()) + "\n\n");
+
+            writer.write("Item               Qty   Price\n");
+            writer.write("--------------------------------\n");
             for (String item : cartItems) {
-                writer.write(item + "\n");
+                writer.write(formatReceiptItem(item) + "\n");
             }
-            writer.write("\nSubtotal: ₱" + temporarytotal.getText());
-            writer.write("\nTax: ₱" + Taxtotal.getText());
-            writer.write("\nTotal: ₱" + overalltotal.getText());
+
+            writer.write("\n");
+            writer.write("--------------------------------\n");
+            writer.write(String.format("%-20s %8s\n", "Subtotal:", "₱" + temporarytotal.getText()));
+            writer.write(String.format("%-20s %8s\n", "Tax:", "₱" + Taxtotal.getText()));
+            writer.write(String.format("%-20s %8s\n", "Total:", "₱" + overalltotal.getText()));
+            writer.write("--------------------------------\n");
+
+            writer.write("\nThank you for shopping with us!\n");
+            writer.write("Please come again.\n");
         } catch (IOException e) {
             showAlert("Error generating receipt.");
         }
+    }
+
+    private String formatReceiptItem(String item) {
+        String[] parts = item.split(" x ");
+        String itemName = parts[0];
+        String quantity = parts[1];
+        return String.format("%-20s %5s", itemName, quantity);
     }
 
     private void saveSalesToCSV() {

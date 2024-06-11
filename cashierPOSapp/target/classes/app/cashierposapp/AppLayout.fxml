@@ -15,7 +15,7 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.Pane?>
 
-<TabPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="539.0" prefWidth="964.0" tabClosingPolicy="UNAVAILABLE" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="app.cashierposapp.AppController">
+<TabPane maxHeight="-Infinity" maxWidth="-Infinity" prefHeight="720.0" prefWidth="1280.0" tabClosingPolicy="UNAVAILABLE" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="app.cashierposapp.AppController">
     <tabs>
         <Tab text="Cashier App">
             <content>
@@ -25,7 +25,7 @@
                         <ListView fx:id="cartListView" layoutX="373.0" layoutY="62.0" prefHeight="372.0" prefWidth="257.0" />
                         <Button fx:id="addButton" layoutX="64.0" layoutY="320.0" onAction="#addToCart" text="Add" />
                         <Button fx:id="editButton" layoutX="67.0" layoutY="355.0" onAction="#editQuantity" prefHeight="25.0" prefWidth="92.0" text="Edit Quantity" />
-                        <Button fx:id="deleteButton" layoutX="64.0" layoutY="280.0" onAction="#deleteFromCart" text="Delete" />
+                        <Button fx:id="deleteButton" layoutX="64.0" layoutY="280.0" onAction="#deleteFromCart" prefWidth="77.0" text="Delete" />
                         <Button fx:id="checkoutButton" layoutX="698.0" layoutY="422.0" onAction="#checkOut" text="Checkout" />
                         <ListView fx:id="SaleHistoryList" layoutX="634.0" layoutY="62.0" prefHeight="230.0" prefWidth="301.0" />
                         <ComboBox fx:id="ItemsComboBox" layoutX="161.0" layoutY="73.0" prefWidth="200.0" promptText="Items" />
@@ -53,9 +53,9 @@
                         <DatePicker fx:id="fromDate" layoutX="80.0" layoutY="40.0" prefWidth="120.0" />
                         <DatePicker fx:id="toDate" layoutX="210.0" layoutY="40.0" prefWidth="120.0" />
                         <Button fx:id="showButton" layoutX="340.0" layoutY="40.0" onAction="#showStatistics" prefHeight="25.0" prefWidth="81.0" text="Show data" />
-                        <ListView fx:id="productListView" layoutX="50.0" layoutY="80.0" prefHeight="169.0" prefWidth="441.0" />
-                        <PieChart fx:id="productPieChart" layoutX="531.0" layoutY="80.0" prefHeight="171.0" prefWidth="258.0" />
-                        <LineChart fx:id="Profitgraph" layoutX="53.0" layoutY="270.0" prefHeight="210.0" prefWidth="446.0">
+                        <ListView fx:id="productListView" layoutX="50.0" layoutY="80.0" prefHeight="302.0" prefWidth="441.0" />
+                        <PieChart fx:id="productPieChart" layoutX="531.0" layoutY="80.0" prefHeight="300.0" prefWidth="465.0" />
+                        <LineChart fx:id="Profitgraph" layoutX="47.0" layoutY="388.0" prefHeight="298.0" prefWidth="446.0">
                             <xAxis>
                                 <CategoryAxis side="BOTTOM" />
                             </xAxis>
