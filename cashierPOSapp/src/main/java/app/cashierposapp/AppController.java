@@ -3,7 +3,7 @@ package app.cashierposapp;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.scene.chart.LineChart;
+import javafx.scene.chart.BarChart;
 import javafx.scene.chart.PieChart;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.*;
@@ -28,7 +28,9 @@ public class AppController {
     @FXML
     private PieChart productPieChart;
     @FXML
-    private LineChart<String, Number> Profitgraph;
+    private BarChart<String, Number> Profitgraph;
+    @FXML
+    private ListView<String> Profit_list_view;
 
     private final ObservableList<String> cartItems = FXCollections.observableArrayList();
     private final ObservableList<String> salesHistory = FXCollections.observableArrayList();
@@ -237,6 +239,7 @@ public class AppController {
     private void showStatistics() {
         productListView.getItems().clear();
         productPieChart.getData().clear();
+        Profit_list_view.getItems().clear(); // Clear previous profit list view entries
 
         LocalDate from = fromDate.getValue();
         LocalDate to = toDate.getValue();
@@ -270,11 +273,24 @@ public class AppController {
                     showAlert("Error reading sales history.");
                 }
 
+                // Calculate total sales for percentage calculation
+                int totalSales = productSales.values().stream().mapToInt(Integer::intValue).sum();
+
                 for (Map.Entry<String, Integer> entry : productSales.entrySet()) {
-                    productPieChart.getData().add(new PieChart.Data(entry.getKey(), entry.getValue()));
+                    String item = entry.getKey();
+                    int quantity = entry.getValue();
+                    double percentage = (quantity / (double) totalSales) * 100;
+                    productPieChart.getData().add(new PieChart.Data(
+                            String.format("%s (%.2f%%)", item, percentage), quantity));
                 }
 
                 updateProfitGraph(dailyProfit);
+
+                // Add total profit per day to Profit_list_view
+                for (Map.Entry<LocalDate, Integer> entry : dailyProfit.entrySet()) {
+                    String profitEntry = String.format("Date: %s | Total Profit: ₱%d", entry.getKey(), entry.getValue());
+                    Profit_list_view.getItems().add(profitEntry);
+                }
             } else {
                 showAlert("No sales history found.");
             }
@@ -312,6 +328,7 @@ public class AppController {
         Taxtotal.setText(String.valueOf(tax));
         overalltotal.setText(String.valueOf(total));
     }
+
 
     private void generateReceipt() {
         String timestamp = DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss").format(java.time.LocalDateTime.now());

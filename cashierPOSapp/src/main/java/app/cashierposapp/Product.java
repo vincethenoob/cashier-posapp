@@ -16,10 +16,6 @@ public class Product {
         this.retailPrice = retailPrice;
     }
 
-    public LocalDate getDate() {
-        return date;
-    }
-
     public void setDate(LocalDate date) {
         this.date = date;
     }
@@ -32,9 +28,7 @@ public class Product {
         this.itemName = itemName;
     }
 
-    public int getQuantity() {
-        return quantity;
-    }
+    public int getQuantity() { return quantity;}
 
     public void setQuantity(int quantity) {
         this.quantity = quantity;

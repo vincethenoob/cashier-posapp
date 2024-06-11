@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.chart.BarChart?>
 <?import javafx.scene.chart.CategoryAxis?>
-<?import javafx.scene.chart.LineChart?>
 <?import javafx.scene.chart.NumberAxis?>
 <?import javafx.scene.chart.PieChart?>
 <?import javafx.scene.control.Button?>
@@ -48,21 +48,23 @@
             <content>
                 <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="510.0" prefWidth="964.0">
                     <children>
-                        <Label layoutX="14.0" layoutY="14.0" text="Top products" />
+                        <Label layoutX="15.0" layoutY="14.0" text="Top products" />
                         <Label layoutX="14.0" layoutY="40.0" text="Date Range" />
                         <DatePicker fx:id="fromDate" layoutX="80.0" layoutY="40.0" prefWidth="120.0" />
                         <DatePicker fx:id="toDate" layoutX="210.0" layoutY="40.0" prefWidth="120.0" />
                         <Button fx:id="showButton" layoutX="340.0" layoutY="40.0" onAction="#showStatistics" prefHeight="25.0" prefWidth="81.0" text="Show data" />
-                        <ListView fx:id="productListView" layoutX="50.0" layoutY="80.0" prefHeight="302.0" prefWidth="441.0" />
-                        <PieChart fx:id="productPieChart" layoutX="531.0" layoutY="80.0" prefHeight="300.0" prefWidth="465.0" />
-                        <LineChart fx:id="Profitgraph" layoutX="47.0" layoutY="388.0" prefHeight="298.0" prefWidth="446.0">
-                            <xAxis>
-                                <CategoryAxis side="BOTTOM" />
-                            </xAxis>
-                            <yAxis>
-                                <NumberAxis side="LEFT" />
-                            </yAxis>
-                        </LineChart>
+                        <ListView fx:id="productListView" layoutX="50.0" layoutY="80.0" prefHeight="245.0" prefWidth="414.0" />
+                        <PieChart fx:id="productPieChart" layoutX="512.0" layoutY="70.0" prefHeight="266.0" prefWidth="449.0" style="-fx-border-color: white;" title="Top product" />
+                  <ListView fx:id="Profit_list_view" layoutX="669.0" layoutY="386.0" prefHeight="251.0" prefWidth="264.0" />
+                  <Label layoutX="17.0" layoutY="326.0" prefHeight="40.0" prefWidth="139.0" text="Profit Chart" />
+                  <BarChart fx:id="Profitgraph" layoutX="45.0" layoutY="362.0" prefHeight="301.0" prefWidth="624.0">
+                    <xAxis>
+                      <CategoryAxis side="BOTTOM" />
+                    </xAxis>
+                    <yAxis>
+                      <NumberAxis side="LEFT" />
+                    </yAxis>
+                  </BarChart>
                     </children>
                 </AnchorPane>
             </content>
